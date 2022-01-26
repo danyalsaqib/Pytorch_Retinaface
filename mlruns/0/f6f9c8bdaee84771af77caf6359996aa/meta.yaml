@@ -1,0 +1,15 @@
+artifact_uri: file:///home/s3/Danyal/retinaface_training/Pytorch_Retinaface/mlruns/0/f6f9c8bdaee84771af77caf6359996aa/artifacts
+end_time: 1643110809976
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+name: ''
+run_id: f6f9c8bdaee84771af77caf6359996aa
+run_uuid: f6f9c8bdaee84771af77caf6359996aa
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1643110804900
+status: 3
+tags: []
+user_id: s3

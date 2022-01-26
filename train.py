@@ -13,6 +13,10 @@ import datetime
 import math
 from models.retinaface import RetinaFace
 
+import mlflow
+import mlflow.pytorch
+from mlflow.tracking import MlflowClient
+
 parser = argparse.ArgumentParser(description='Retinaface Training')
 parser.add_argument('--training_dataset', default='./data/widerface/train/label.txt', help='Training dataset directory')
 parser.add_argument('--network', default='mobile0.25', help='Backbone network mobile0.25 or resnet50')
@@ -52,8 +56,9 @@ training_dataset = args.training_dataset
 save_folder = args.save_folder
 
 net = RetinaFace(cfg=cfg)
-print("Printing net...")
-print(net)
+mlflow.pytorch.log_model(net, "model")
+#print("Printing net...")
+#print(net)
 
 if args.resume_net is not None:
     print('Loading resume network...')
@@ -80,7 +85,11 @@ cudnn.benchmark = True
 
 optimizer = optim.SGD(net.parameters(), lr=initial_lr, momentum=momentum, weight_decay=weight_decay)
 criterion = MultiBoxLoss(num_classes, 0.35, True, 0, True, 7, 0.35, False)
-
+mlflow.log_param('optimizer', optimizer)
+mlflow.log_param('initial_lr', initial_lr)
+mlflow.log_param('momentum', momentum)
+mlflow.log_param('weight_decay', weight_decay)
+mlflow.log_param('criterion', criterion)
 priorbox = PriorBox(cfg, image_size=(img_dim, img_dim))
 with torch.no_grad():
     priors = priorbox.forward()
@@ -94,9 +103,13 @@ def train():
     dataset = WiderFaceDetection( training_dataset,preproc(img_dim, rgb_mean))
 
     epoch_size = math.ceil(len(dataset) / batch_size)
+    mlflow.log_param('epoch size', epoch_size)
+    mlflow.log_param('batch size', batch_size)
     max_iter = max_epoch * epoch_size
+    mlflow.log_param('max_iter', max_iter)
 
     stepvalues = (cfg['decay1'] * epoch_size, cfg['decay2'] * epoch_size)
+    mlflow.log_param('stepvalues', stepvalues)
     step_index = 0
 
     if args.resume_epoch > 0:
@@ -133,10 +146,12 @@ def train():
         optimizer.step()
         load_t1 = time.time()
         batch_time = load_t1 - load_t0
+        mlflow.log_metric('batch_time', batch_time, iteration)
         eta = int(batch_time * (max_iter - iteration))
         print('Epoch:{}/{} || Epochiter: {}/{} || Iter: {}/{} || Loc: {:.4f} Cla: {:.4f} Landm: {:.4f} || LR: {:.8f} || Batchtime: {:.4f} s || ETA: {}'
               .format(epoch, max_epoch, (iteration % epoch_size) + 1,
               epoch_size, iteration + 1, max_iter, loss_l.item(), loss_c.item(), loss_landm.item(), lr, batch_time, str(datetime.timedelta(seconds=eta))))
+        log_scalar('train_loss', loss.data.item(), iteration)
 
     torch.save(net.state_dict(), save_folder + cfg['name'] + '_Final.pth')
     # torch.save(net.state_dict(), save_folder + 'Final_Retinaface.pth')
@@ -155,6 +170,11 @@ def adjust_learning_rate(optimizer, gamma, epoch, step_index, iteration, epoch_s
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
     return lr
+
+def log_scalar(name, value, step):
+
+    """Log a scalar value to both MLflow and TensorBoard"""
+    mlflow.log_metric(name, value, step=step)
 
 if __name__ == '__main__':
     train()

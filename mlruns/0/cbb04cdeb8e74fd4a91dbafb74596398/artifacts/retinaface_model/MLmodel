@@ -1,0 +1,14 @@
+artifact_path: retinaface_model
+flavors:
+  python_function:
+    data: data
+    env: conda.yaml
+    loader_module: mlflow.pytorch
+    pickle_module_name: mlflow.pytorch.pickle_module
+    python_version: 3.6.9
+  pytorch:
+    model_data: data
+    pytorch_version: 1.8.1+cu111
+model_uuid: 5f943e1e38aa4e6dba98e34251058dea
+run_id: cbb04cdeb8e74fd4a91dbafb74596398
+utc_time_created: '2022-01-25 10:46:13.558324'
