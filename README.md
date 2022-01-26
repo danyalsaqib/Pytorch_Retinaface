@@ -3,6 +3,7 @@
 ## Danyal's Preface
 This repository contains files for finetuning of the retinaface pytorch module, alongside MLflow logging for the model, its parameters, and its metrics. Run the file 'train.py' using python to finetune the model, and log information: `python3 train.py`. The training dataset is under 'data/widerface/train'.
 
+## Introduction
 A [PyTorch](https://pytorch.org/) implementation of [RetinaFace: Single-stage Dense Face Localisation in the Wild](https://arxiv.org/abs/1905.00641). Model size only 1.7M, when Retinaface use mobilenet0.25 as backbone net. We also provide resnet50 as backbone net to get better result. The official code in Mxnet can be found [here](https://github.com/deepinsight/insightface/tree/master/RetinaFace).
 
 ## Mobile or Edge device deploy
