@@ -39,6 +39,9 @@ if args.network == "mobile0.25":
 elif args.network == "resnet50":
     cfg = cfg_re50
 
+network_backbone = args.network
+mlflow.log_param('network_backbone', network_backbone)
+
 rgb_mean = (104, 117, 123) # bgr order
 num_classes = 2
 img_dim = cfg['image_size']
